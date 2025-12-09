@@ -10,7 +10,7 @@ mapfile -t DISKS < <(lsblk -dn -o NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}')
 for dev in "${DISKS[@]}"; do
   name="${dev#/dev/}"
 
-  # 1) BUS 类型
+  # 1) 接口类型
   # lsblk 的 TRAN 输出：sata / sas / usb / nvme / ...
   tran="$(lsblk -dn -o TRAN "$dev" 2>/dev/null | head -n1)"
   case "$tran" in
@@ -20,7 +20,7 @@ for dev in "${DISKS[@]}"; do
     *)        bus="${tran:-unknown}" ;;
   esac
 
-  # 2) BUS_DIR（你的原逻辑大概率是从 sysfs 找父级；这里给一个通用写法）
+  # 2) BUS_DIR 
   # /sys/block/<name>/device 可能在不同总线下层级不同，所以向上找一个像 ataX/usbX/nvmeX 的目录名
   sys_path="$(readlink -f "/sys/block/$name")"
   bus_dir="$(
